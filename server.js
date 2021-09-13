@@ -2,7 +2,6 @@
 const { resolveSoa } = require('dns');
 const express = require('express');
 const fs = require('fs');
-const { dirname } = require('path');
 const path = require('path');
 
 // Assign port to use
@@ -16,14 +15,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// GET route for homepage (logic borrowed from instructor solution of mini project 11)
-app.get('*', (req, res) =>
-    res.sendfile(path.join(__dirname, '/public/index.html'))
-);
-
 // GET route for notes page (logic borrowed from instructor solution of mini project 11)
 app.get('/notes', (req, res) =>
-    res.sendfile(path.join(__dirname, '/public/notes.html'))
+    res.sendFile(path.join(__dirname, '/public/notes.html'))
+);
+
+// GET API route for JSON
+app.get('/api/notes', (req, res) =>
+    res.sendFile(path.join(__dirname, '/db/db.json'))
+);
+
+// GET route for homepage (logic borrowed from instructor solution of mini project 11)
+app.get('*', (req, res) =>
+    res.sendFile(path.join(__dirname, '/public/index.html'))
 );
 
 app.listen(PORT, () =>
