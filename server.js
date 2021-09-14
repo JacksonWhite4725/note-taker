@@ -3,7 +3,7 @@ const { resolveSoa } = require('dns');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { readAndAppend } = require('../../01-Activities/28-Stu_Mini-Project/Main/helpers/fsUtils');
+const db = require('./db/db.json');
 
 // Assign port to use
 const PORT = process.env.port || 3001;
@@ -27,12 +27,30 @@ app.get('/api/notes', (req, res) =>
 );
 
 // POST API route for JSON note. ID generation logic taken from W3 schools. POST request logic taken from codeforgeek (https://codeforgeek.com/handle-get-post-request-express-4/) and activities in module 11.
-app.post('api/notes', (req, res) => {
-    const {title, text} = req.body;
-    const newNote = {title, text, id: Math.floor(Math.random() * 101)};
-    readAndAppend(newNote, '/db/db.json');
-    res.end('Note added successfully!');
+app.post('/api/notes', (req, res) => {
+    const newNote = req.body;
+    newNote.id = Math.floor(Math.random() * 101);
+    readAndAppend(newNote, './db/db.json');
+    res.json('Note added successfully!');
+    db.push(newNote);
 });
+
+const writeToFile = (destination, content) =>
+    fs.writeFile(destination, JSON.stringify(content, null, 4), (err) =>
+        err ? console.error(err) : console.info('Note info written!')
+    );
+
+const readAndAppend = (content, file) => {
+    fs.readFile(file, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+        } else {
+            const parsedData = JSON.parse(data);
+            parsedData.push(content);
+            writeToFile(file, parsedData);
+        }
+    });
+}
 
 // GET route for homepage (logic borrowed from instructor solution of mini project 11)
 app.get('*', (req, res) =>
